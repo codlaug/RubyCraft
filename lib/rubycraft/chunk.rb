@@ -22,24 +22,7 @@ module RubyCraft
       name, @nbtBody = nbtData
       @options = options
       unless options[:no_blocks]
-        build_blocks
-      end
-    end
-
-    def build_blocks
-      bytes = level["Blocks"].value.bytes
-      @blocks = matrixfromBytes bytes
-      @blocks.each_triple_index do |b, z, x, y|
-        b.pos = [z, x, y]
-      end
-      data = level["Data"].value.bytes.to_a
-      @blocks.each_with_index do |b, index|
-        v = data[index / 2]
-        if index % 2 == 0
-          b.data = v & 0xF
-        else
-          b.data = v >> 4
-        end
+        @blocks = parse_blocks
       end
     end
 
@@ -106,6 +89,10 @@ module RubyCraft
       @nbtBody["Level"]
     end
 
+    def sections
+      level['Sections']
+    end
+
     def exportLevelData
       data = []
       @blocks.each_with_index do |b, i|
@@ -122,10 +109,30 @@ module RubyCraft
       NBTFile::Types::ByteArray.new ByteConverter.toByteString(data)
     end
 
-    def matrixfromBytes(bytes)
-      Matrix3d.new(*dimensions).fromArray bytes.map {|byte| Block.get(byte) }
+    def parse_blocks
+      Matrix3d.new(*dimensions).tap do |matrix|
+        index = 0
+        sections.each do |section|
+          blocks = section['Blocks'].value.bytes
+          data   = section['Data'].value.bytes
+          blocks.each do |byte|
+            block = Block.get(byte)
+            block.data = extract_data_half_byte data[index / 2], index
+            block.pos = *matrix.positionAt(index)
+            matrix.put index, block
+            index += 1
+          end
+        end
+      end
     end
 
+    def extract_data_half_byte(value, index)
+      if index % 2 == 0
+        value & 0xF
+      else
+        value >> 4
+      end
+    end
 
   end
 end
