@@ -40,7 +40,7 @@ module ChunkHelper
 
   # Opening Chunk so that we can test with smaller data set (2x2x8 per chunk),
   # instead of 16x16x128 of regular minecraft chunk
-  def createChunk(blockdata = [0] * datacube, blocks = [Block[:stone].id] * cube)
+  def createMCRegionChunk(blockdata = [0] * datacube, blocks = [Block[:stone].id] * cube)
     nbt = NBTFile::Types::Compound.new
     nbt["Level"] = NBTFile::Types::Compound.new
     level = nbt["Level"]
