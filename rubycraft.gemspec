@@ -20,13 +20,13 @@ blocks in region files in whatever way you see fit. Example: http://bit.ly/r62qG
     "README.md",
     "Rakefile",
     "VERSION",
-    "lib/block.rb",
-    "lib/block_type.rb",
-    "lib/byte_converter.rb",
-    "lib/chunk.rb",
-    "lib/matrix3d.rb",
-    "lib/nbt_helper.rb",
-    "lib/region.rb"
+    "lib/rubycraft/block.rb",
+    "lib/rubycraft/block_type.rb",
+    "lib/rubycraft/byte_converter.rb",
+    "lib/rubycraft/chunk.rb",
+    "lib/rubycraft/matrix3d.rb",
+    "lib/rubycraft/nbt_helper.rb",
+    "lib/rubycraft/region.rb"
   ]
   s.homepage = %q{http://github.com/danielribeiro/RubyCraft}
   s.require_paths = ["lib"]
