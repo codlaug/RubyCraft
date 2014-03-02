@@ -1,0 +1,10 @@
+language: ruby
+rvm:
+  - 2.0.0
+branches:
+  only:
+    - development
+    - master
+    - /^feature\//
+script:
+  - bundle exec rspec

@@ -1,5 +1,4 @@
 require 'rspec_helper'
-require 'chunk_helper'
 
 # Opening Chunk cube so that the chunk sizes are the ones under test.
 # See chunk_helper
@@ -22,7 +21,7 @@ describe Region do
   include ZlibHelper
 
   def compressedChunk
-    chunk = createChunk
+    chunk = createMCRegionChunk
     output = StringIO.new
     name, body = chunk.export
     NBTFile.write(output, name, body)
@@ -49,7 +48,7 @@ describe Region do
     remaining = 4096 - (size % 4096)
     pad = [0] * (remaining % 4096)
     chunkdata = metadata + chunk + pad
-    Region.new locations + timestamps + chunkdata
+    Region.new locations + timestamps + chunkdata, chunk_dimensions: chunk_dimensions
   end
 
   it "yields the chunk position as a Chunk object" do
@@ -70,7 +69,7 @@ describe Region do
     file = StringIO.new
     r.exportTo(file)
     bytes = stringToByteArray file.string
-    newRegion = Region.new bytes
+    newRegion = Region.new bytes, chunk_dimensions: chunk_dimensions
     blocksAre newRegion.chunk(0, 0), :gold
   end
 
@@ -87,7 +86,7 @@ describe Region do
   it "can view cubes of one chunk other than 0, 0" do
     r = region
     chunks = r.instance_variable_get(:@chunks)
-    chunks[1][1] = createChunk
+    chunks[1][1] = createMCRegionChunk
     r.cube(3, 3, 1, :width => 1, :length => 1, :height => 7) do |block, z, x, y|
       block.name = :wool
     end
@@ -109,10 +108,10 @@ describe Region do
   it "can view cubes spanning chunks with a single coordinate system" do
     r = region
     chunks = r.instance_variable_get(:@chunks)
-    chunks[0][1] = createChunk
-    chunks[1][1] = createChunk
-    chunks[1][0] = createChunk
-    chunks[2][0] = createChunk
+    chunks[0][1] = createMCRegionChunk
+    chunks[1][1] = createMCRegionChunk
+    chunks[1][0] = createMCRegionChunk
+    chunks[2][0] = createMCRegionChunk
     r.cube(1, 1, 1, :width => 3, :length => 3, :height => 7) do |block, z, x, y|
       block.name = :wool
     end

@@ -1,19 +1,17 @@
 require 'rspec_helper'
-require 'rubycraft'
-require 'chunk_helper'
 describe Chunk do
   include ByteConverter
   include ChunkHelper
 
 
   it "can use to change all block to another type" do
-    chunk = createChunk
+    chunk = createMCRegionChunk
     chunk.block_map { :gold }
     blocksAre chunk, :gold
   end
 
   it "can iterate over all blocks and change them" do
-    chunk = createChunk
+    chunk = createMCRegionChunk
     chunk.block_map do |block|
       if block.is :stone
         :gold
@@ -25,7 +23,7 @@ describe Chunk do
   end
 
   it "can iterate over all blocks while only getting their name as symbol" do
-    chunk = createChunk
+    chunk = createMCRegionChunk
     chunk.block_type_map do |blockname|
       if blockname == :stone
         :gold
@@ -37,7 +35,7 @@ describe Chunk do
   end
 
   it "can iterate over blocks with position data" do
-    chunk = createChunk
+    chunk = createMCRegionChunk
     heights = []
     chunk.block_map do |block|
       heights << block.pos if heights.length < 5
@@ -47,7 +45,7 @@ describe Chunk do
   end
 
   it "is mutable. Change the blocks on the each method, change export" do
-    chunk = createChunk
+    chunk = createMCRegionChunk
     chunk.each do |block|
       block.name = :gold
     end
@@ -55,13 +53,13 @@ describe Chunk do
   end
 
   it "can change a block given by x, z, y" do
-    chunk = createChunk
+    chunk = createMCRegionChunk
     chunk[0, 0, 0].name = :gold
     blocksEqual chunk, [:gold] + [:stone] * (cube - 1)
   end
 
   it "can change data as well" do
-    chunk = createChunk
+    chunk = createMCRegionChunk
     chunk.each do |block|
       block.name = :wool
       if block.pos == [0, 0, 0]
@@ -78,13 +76,13 @@ describe Chunk do
   end
 
   it "can read the data from the levels" do
-    chunk = createChunk([(2 << 4) + 1] * datacube)
+    chunk = createMCRegionChunk([(2 << 4) + 1] * datacube)
     data = chunk.map { |b| b.data }
     data.should == [1, 2] * datacube
   end
 
   it "corrects the height attribute when you export" do
-    chunk = createChunk
+    chunk = createMCRegionChunk
     chunk.each do |block|
       if block.y > 0
         block.name = :air
