@@ -8,9 +8,8 @@ module RubyCraft
       self << Array.new(count) { value }
     end
 
-    def <<(o)
-      input = o.kind_of?(Array) ? o : [o]
-      @io <<  ByteConverter.toByteString(input)
+    def <<(input)
+      @io <<  ByteConverter.toByteString( Array(input) )
     end
 
     def close
