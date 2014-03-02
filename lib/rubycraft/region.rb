@@ -1,87 +1,9 @@
-require 'rubycraft/chunk'
-
 module RubyCraft
-  class LazyChunkDelegate
-    include ByteConverter
-    include ZlibHelper
-
-    def initialize(bytes, options = {})
-      @bytes = bytes
-      @options = options
-      @chunk = nil
-    end
-
-    def each(&block)
-      _getchunk.each &block
-    end
-  
-    def block_map(&block)
-      _getchunk.block_map &block
-    end
-    def block_type_map(&block)
-      _getchunk.block_type_map &block
-    end
-
-    def [](z, x, y)
-      _getchunk[z, x, y]
-    end
-
-    def []=(z, x, y, value)
-      _getchunk[z, x, y] = value
-    end
-
-    def export
-      _getchunk.export
-    end
-
-
-    def toNbt
-      return @bytes if @chunk.nil?
-      @chunk.toNbt
-    end
-
-
-    # unloacs the loaded chunk. Needed for memory optmization
-    def _unload
-      return if @chunk.nil?
-      @bytes = @chunk.toNbt
-      @chunk = nil
-    end
-
-    protected
-    def _getchunk
-      if @chunk.nil?
-        @chunk = Chunk.fromNbt @bytes, @options
-      end
-      @chunk
-    end
-
-  end
-
   # Enumerable over chunks
   class Region
     include Enumerable
     include ByteConverter
     include ZlibHelper
-  
-    class RegionWritter
-      def initialize(io)
-        @io = io
-      end
-
-      def pad(count, value = 0)
-        self << Array.new(count) { value }
-      end
-
-      def <<(o)
-        input = o.kind_of?(Array) ? o : [o]
-        @io <<  ByteConverter.toByteString(input)
-      end
-
-      def close
-        @io.close
-      end
-    end
 
     def self.fromFile(filename)
       new ByteConverter.stringToByteArray IO.read filename
@@ -118,8 +40,8 @@ module RubyCraft
     end
 
     def exportTo(io)
-      output = RegionWritter.new io
-      chunks = getChunks
+      output = RegionWriter.new io
+      chunks = get_nbt_chunks
       writeChunkOffsets output, chunks
       output.pad blockSize, dummytimestamp
       writeChunks output, chunks
@@ -147,7 +69,7 @@ module RubyCraft
       bytecount = bytesToInt @bytes[o..(o + 4)]
       o += 5
       nbtBytes = @bytes[o..(o + bytecount - 2)]
-      LazyChunkDelegate.new nbtBytes, @options
+      LazyChunk.new nbtBytes, @options
     end
 
     def chunkSize(chunk)
@@ -183,7 +105,7 @@ module RubyCraft
       end
     end
 
-    def getChunks
+    def get_nbt_chunks
       map do |chunk|
         if chunk.nil?
           nil
