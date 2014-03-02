@@ -44,5 +44,7 @@ blocks in region files in whatever way you see fit. Example: http://bit.ly/r62qG
   else
     s.add_dependency(%q<nbtfile>, [">= 0.2.0"])
   end
+
+  s.add_development_dependency 'rspec', '~> 2.14.1'
 end
 

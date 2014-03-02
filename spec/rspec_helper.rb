@@ -32,7 +32,7 @@ module RspecDSLExtensions
 end
 
 
-Spec::Matchers.define :contain_same do |*args|
+RSpec::Matchers.define :contain_same do |*args|
   match do |collection|
     if args.to_set.size != args.size
       raise ArgumentError.new "Args must not contain repeated elements"
@@ -56,7 +56,7 @@ Spec::Matchers.define :contain_same do |*args|
   end
 end
 
-Spec::Matchers.define :contain_names do |*args|
+RSpec::Matchers.define :contain_names do |*args|
   match do |orm_result|
     MatchHelpers.same_set orm_result.map_by(:name), args.map_by(:to_s)
   end
@@ -72,7 +72,7 @@ Spec::Matchers.define :contain_names do |*args|
 end
 
 
-class Spec::Example::ExampleGroup
+class RSpec::Core::ExampleGroup
   include RspecExtensions
   extend RspecDSLExtensions
 end
