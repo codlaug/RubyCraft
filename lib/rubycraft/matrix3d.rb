@@ -73,10 +73,6 @@ module RubyCraft
       end
     end
 
-    def positionAt(index)
-      indexToArray(index)
-    end
-
     protected
     def indexToArray(index)
       x = index / (@zlimit * @ylimit)
