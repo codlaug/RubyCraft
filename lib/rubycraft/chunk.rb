@@ -14,12 +14,19 @@ module RubyCraft
     Length = 16
     Height = 128
 
-    def self.fromNbt(bytes)
-      new NbtHelper.fromNbt bytes
+    def self.fromNbt(bytes, *a)
+      new NbtHelper.fromNbt(bytes), *a
     end
 
-    def initialize(nbtData)
+    def initialize(nbtData, options = {})
       name, @nbtBody = nbtData
+      @options = options
+      unless options[:no_blocks]
+        build_blocks
+      end
+    end
+
+    def build_blocks
       bytes = level["Blocks"].value.bytes
       @blocks = matrixfromBytes bytes
       @blocks.each_triple_index do |b, z, x, y|
@@ -34,6 +41,10 @@ module RubyCraft
           b.data = v >> 4
         end
       end
+    end
+
+    def dimensions
+      @options.fetch(:chunk_dimensions) { [Width, Length, Height] }
     end
 
     # Iterates over the blocks
@@ -112,7 +123,7 @@ module RubyCraft
     end
 
     def matrixfromBytes(bytes)
-      Matrix3d.new(Width, Length, Height).fromArray bytes.map {|byte| Block.get(byte) }
+      Matrix3d.new(*dimensions).fromArray bytes.map {|byte| Block.get(byte) }
     end
 
 

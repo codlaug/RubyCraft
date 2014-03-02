@@ -1,13 +1,5 @@
 # Testing utils for those that involve chunks
 
-# Opening Chunk so that we can test with smaller data set (2x2x8 per chunk),
-#instead of 16x16x128 of regular minecraft chunk
-class RubyCraft::Chunk
-  def matrixfromBytes(bytes)
-    Matrix3d.new(2, 2, 8).fromArray bytes.map {|byte| Block.get(byte) }
-  end
-end
-
 module ChunkHelper
   # height of the test chunk
   def h
@@ -42,6 +34,12 @@ module ChunkHelper
     NBTFile::Types::ByteArray.new toByteString array
   end
 
+  def chunk_dimensions
+    [2, 2, 8]
+  end
+
+  # Opening Chunk so that we can test with smaller data set (2x2x8 per chunk),
+  # instead of 16x16x128 of regular minecraft chunk
   def createChunk(blockdata = [0] * datacube, blocks = [Block[:stone].id] * cube)
     nbt = NBTFile::Types::Compound.new
     nbt["Level"] = NBTFile::Types::Compound.new
@@ -49,6 +47,6 @@ module ChunkHelper
     level['HeightMap'] = byteArray [h] * area
     level["Blocks"] = byteArray blocks
     level["Data"] = byteArray blockdata
-    Chunk.new(["", nbt])
+    Chunk.new ["", nbt], chunk_dimensions: chunk_dimensions
   end
 end

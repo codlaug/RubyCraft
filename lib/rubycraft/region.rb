@@ -5,8 +5,9 @@ module RubyCraft
     include ByteConverter
     include ZlibHelper
 
-    def initialize(bytes)
+    def initialize(bytes, options = {})
       @bytes = bytes
+      @options = options
       @chunk = nil
     end
 
@@ -50,7 +51,7 @@ module RubyCraft
     protected
     def _getchunk
       if @chunk.nil?
-        @chunk = Chunk.fromNbt @bytes
+        @chunk = Chunk.fromNbt @bytes, @options
       end
       @chunk
     end
@@ -86,9 +87,10 @@ module RubyCraft
       new ByteConverter.stringToByteArray IO.read filename
     end
 
-    def initialize(bytes)
+    def initialize(bytes, options = {})
       raise "Must be an io" if bytes.kind_of?(String)
       @bytes = bytes
+      @options = options
       @chunks = Array.new(32) { Array.new(32) }
       readChunks bytes
     end
@@ -145,7 +147,7 @@ module RubyCraft
       bytecount = bytesToInt bytes[o..(o + 4)]
       o += 5
       nbtBytes = bytes[o..(o + bytecount - 2)]
-      LazyChunkDelegate.new nbtBytes
+      LazyChunkDelegate.new nbtBytes, @options
     end
 
     def chunkSize(chunk)

@@ -49,7 +49,7 @@ describe Region do
     remaining = 4096 - (size % 4096)
     pad = [0] * (remaining % 4096)
     chunkdata = metadata + chunk + pad
-    Region.new locations + timestamps + chunkdata
+    Region.new locations + timestamps + chunkdata, chunk_dimensions: chunk_dimensions
   end
 
   it "yields the chunk position as a Chunk object" do
@@ -70,7 +70,7 @@ describe Region do
     file = StringIO.new
     r.exportTo(file)
     bytes = stringToByteArray file.string
-    newRegion = Region.new bytes
+    newRegion = Region.new bytes, chunk_dimensions: chunk_dimensions
     blocksAre newRegion.chunk(0, 0), :gold
   end
 
