@@ -92,7 +92,7 @@ module RubyCraft
       @bytes = bytes
       @options = options
       @chunks = Array.new(32) { Array.new(32) }
-      readChunks bytes
+      populateChunks
     end
 
     def chunk(z, x)
@@ -132,21 +132,21 @@ module RubyCraft
 
 
     protected
-    def readChunks(bytes)
-      bytes[0..(blockSize - 1)].each_slice(4).each_with_index do |ar, i|
+    def populateChunks
+      @bytes[0..(blockSize - 1)].each_slice(4).each_with_index do |ar, i|
         offset = bytesToInt [0] + ar[0..-2]
         count = ar.last
         if count > 0
-          @chunks[i / 32][i % 32 ] = readChunk(offset, bytes)
+          @chunks[i / 32][i % 32 ] = readChunk(offset)
         end
       end
     end
 
-    def readChunk(offset, bytes)
+    def readChunk(offset)
       o = offset * blockSize
-      bytecount = bytesToInt bytes[o..(o + 4)]
+      bytecount = bytesToInt @bytes[o..(o + 4)]
       o += 5
-      nbtBytes = bytes[o..(o + bytecount - 2)]
+      nbtBytes = @bytes[o..(o + bytecount - 2)]
       LazyChunkDelegate.new nbtBytes, @options
     end
 
