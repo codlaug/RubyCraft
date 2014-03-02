@@ -46,5 +46,7 @@ blocks in region files in whatever way you see fit. Example: http://bit.ly/r62qG
   end
 
   s.add_development_dependency 'rspec', '~> 2.14.1'
+  s.add_development_dependency 'guard', '~> 2.3.0'
+  s.add_development_dependency 'guard-rspec', '~> 4.2.7'
 end
 
