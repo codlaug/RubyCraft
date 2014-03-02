@@ -39,7 +39,7 @@ module RubyCraft
       for z in @data
         for y in z
           for x in y
-            yield x if x
+            yield x
           end
         end
       end
@@ -50,7 +50,7 @@ module RubyCraft
       @data.each_with_index do |plane, x|
         plane.each_with_index do |column, y|
           column.each_with_index do |value, z|
-            yield value, x ,y ,z if value
+            yield value, x, y, z
           end
         end
       end
