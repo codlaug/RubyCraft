@@ -1,5 +1,4 @@
 require 'rspec_helper'
-require 'chunk_helper'
 
 # Opening Chunk cube so that the chunk sizes are the ones under test.
 # See chunk_helper
