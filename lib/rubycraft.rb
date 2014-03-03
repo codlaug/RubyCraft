@@ -2,6 +2,8 @@ module RubyCraft
   VERSION = "0.1.1".freeze
 
   autoload :Region              ,'rubycraft/region'
+  autoload :AnvilRegion         ,'rubycraft/anvil_region'
+  autoload :ScaevolusRegion     ,'rubycraft/scaevolus_region'
   autoload :Chunk               ,'rubycraft/chunk'
   autoload :Block               ,'rubycraft/block'
   autoload :LazyChunk           ,'rubycraft/lazy_chunk'

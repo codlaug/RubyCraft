@@ -48,7 +48,7 @@ describe Region do
     remaining = 4096 - (size % 4096)
     pad = [0] * (remaining % 4096)
     chunkdata = metadata + chunk + pad
-    Region.new locations + timestamps + chunkdata, chunk_dimensions: chunk_dimensions
+    ScaevolusRegion.new locations + timestamps + chunkdata, chunk_dimensions: chunk_dimensions
   end
 
   it "yields the chunk position as a Chunk object" do
@@ -69,7 +69,7 @@ describe Region do
     file = StringIO.new
     r.exportTo(file)
     bytes = stringToByteArray file.string
-    newRegion = Region.new bytes, chunk_dimensions: chunk_dimensions
+    newRegion = ScaevolusRegion.new bytes, chunk_dimensions: chunk_dimensions
     blocksAre newRegion.chunk(0, 0), :gold
   end
 
@@ -121,5 +121,16 @@ describe Region do
     blocksEqual r.chunk(0, 1), ([:stone] * h  + semiWool) *  2
     blocksEqual r.chunk(1, 1), semiWool * area
     blocksAre r.chunk(2, 0), :stone
+  end
+
+  describe '.from_file' do
+    let(:anvil) { '/media/niklas/Spinn/Games/FTB/YogCraft/minecraft/saves/FS/region/r.0.0.mca' }
+
+    it 'can open Anvil file' do
+      region = double 'AnvilRegion'
+      RubyCraft::AnvilRegion.should_receive(:fromFile).and_return(region)
+      described_class.from_file(anvil).should == region
+    end
+
   end
 end

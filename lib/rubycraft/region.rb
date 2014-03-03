@@ -5,6 +5,15 @@ module RubyCraft
     include ByteConverter
     include ZlibHelper
 
+    def self.from_file(filename)
+      path = Pathname.new(filename).expand_path
+      if path.extname == '.mca'
+        AnvilRegion
+      else
+        ScaevolusRegion
+      end.fromFile(path)
+    end
+
     def self.fromFile(filename)
       new ByteConverter.stringToByteArray IO.read filename
     end
@@ -13,24 +22,7 @@ module RubyCraft
       raise "Must be an io" if bytes.kind_of?(String)
       @bytes = bytes
       @options = options
-      @chunks = Array.new(32) { Array.new(32) }
       populateChunks
-    end
-
-    def chunk(z, x)
-      @chunks[z][x]
-    end
-
-    def unloadChunk(z, x)
-      @chunks[z][x]._unload
-    end
-
-    def each(&block)
-      @chunks.each do |line|
-        line.each do |chunk|
-          yield chunk
-        end
-      end
     end
 
     def cube(z, y, x, opts = {}, &block)
@@ -54,16 +46,6 @@ module RubyCraft
 
 
     protected
-    def populateChunks
-      @bytes[0..(blockSize - 1)].each_slice(4).each_with_index do |ar, i|
-        offset = bytesToInt [0] + ar[0..-2]
-        count = ar.last
-        if count > 0
-          @chunks[i / 32][i % 32 ] = readChunk(offset)
-        end
-      end
-    end
-
     def readChunk(offset)
       o = offset * blockSize
       bytecount = bytesToInt @bytes[o..(o + 4)]
