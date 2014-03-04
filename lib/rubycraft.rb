@@ -1,6 +1,7 @@
 module RubyCraft
   VERSION = "0.1.1".freeze
 
+  autoload :BinaryBunch         ,'rubycraft/binary_bunch'
   autoload :Region              ,'rubycraft/region'
   autoload :AnvilRegion         ,'rubycraft/anvil_region'
   autoload :ScaevolusRegion     ,'rubycraft/scaevolus_region'

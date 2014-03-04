@@ -1,32 +1,9 @@
 module RubyCraft
   # Enumerable over chunks
-  class Region
-    include Enumerable
-    include ByteConverter
-    include ZlibHelper
-
-    def self.from_file(filename)
-      path = Pathname.new(filename).expand_path
-      if path.extname == '.mca'
-        AnvilRegion
-      else
-        ScaevolusRegion
-      end.fromFile(path)
-    end
-
-    def self.fromFile(filename)
-      new ByteConverter.stringToByteArray IO.read filename
-    end
-
-    def initialize(bytes, options = {})
-      raise "Must be an io" if bytes.kind_of?(String)
-      @bytes = bytes
-      @options = options
+  class Region < BinaryBunch
+    def initialize(*)
+      super
       populateChunks
-    end
-
-    def inspect
-      %Q~<#{self.class} (#{@bytes.length} bytes)>~
     end
 
     def cube(z, y, x, opts = {}, &block)
@@ -42,10 +19,6 @@ module RubyCraft
       output.pad blockSize, dummytimestamp
       writeChunks output, chunks
       output.close
-    end
-
-    def exportToFile(filename)
-      File.open(filename, "wb") { |f| exportTo f }
     end
 
 
