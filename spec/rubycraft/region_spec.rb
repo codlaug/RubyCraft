@@ -126,7 +126,7 @@ describe Region do
   describe '.from_file' do
     let(:anvil) { '/media/niklas/Spinn/Games/FTB/YogCraft/minecraft/saves/FS/region/r.0.0.mca' }
 
-    it 'can open Anvil file' do
+    it 'delegates .mca files to AnvilRegion' do
       region = double 'AnvilRegion'
       RubyCraft::AnvilRegion.should_receive(:fromFile).and_return(region)
       described_class.from_file(anvil).should == region
