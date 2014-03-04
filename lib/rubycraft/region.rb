@@ -49,15 +49,20 @@ module RubyCraft
       output.close
     end
 
+    def chunks_count_per_side
+      options.fetch(:chunks_count_per_side) { 32 }
+    end
+
 
     protected
     def populateChunks
-      @chunks = Array.new(32) { Array.new(32) }
+      side = chunks_count_per_side
+      @chunks = Array.new(side) { Array.new(side) }
       @bytes[0..(blockSize - 1)].each_slice(4).each_with_index do |ar, i|
         offset = bytesToInt [0] + ar[0..-2]
         count = ar.last
         if count > 0
-          @chunks[i / 32][i % 32 ] = readChunk(offset)
+          @chunks[i / side][i % side ] = readChunk(offset)
         end
       end
     end
