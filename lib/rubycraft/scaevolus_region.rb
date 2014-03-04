@@ -1,24 +1,7 @@
 module RubyCraft
   class ScaevolusRegion < Region
     def initialize(*)
-      @chunks = Array.new(32) { Array.new(32) }
       super
-    end
-
-    def chunk(z, x)
-      @chunks[z][x]
-    end
-
-    def unloadChunk(z, x)
-      @chunks[z][x]._unload
-    end
-
-    def each(&block)
-      @chunks.each do |line|
-        line.each do |chunk|
-          yield chunk
-        end
-      end
     end
 
     protected

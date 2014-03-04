@@ -3,7 +3,24 @@ module RubyCraft
   class Region < BinaryBunch
     def initialize(*)
       super
+      @chunks = Array.new(32) { Array.new(32) }
       populateChunks
+    end
+
+    def chunk(z, x)
+      @chunks[z][x]
+    end
+
+    def unloadChunk(z, x)
+      @chunks[z][x]._unload
+    end
+
+    def each(&block)
+      @chunks.each do |line|
+        line.each do |chunk|
+          yield chunk
+        end
+      end
     end
 
     def cube(z, y, x, opts = {}, &block)
