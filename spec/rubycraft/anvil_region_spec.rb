@@ -6,6 +6,10 @@ describe RubyCraft::AnvilRegion do
 
   it 'opens the file' do
     expect { subject }.not_to raise_error
-    should have(32*32).chunks
+
+    # loads chunks
+    subject.chunk_string.count('X').should > 800
+    # non-existing chunks
+    subject.chunk_string.count('?').should > 100
   end
 end

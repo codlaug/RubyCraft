@@ -3,7 +3,6 @@ module RubyCraft
   class Region < BinaryBunch
     def initialize(*)
       super
-      @chunks = Array.new(32) { Array.new(32) }
       populateChunks
     end
 
@@ -23,6 +22,18 @@ module RubyCraft
       end
     end
 
+    def chunk_string
+      @chunks.map do |line|
+        line.map do |chunk|
+          if chunk.nil?
+            '?'
+          else
+            'X'
+          end
+        end.join
+      end.join("\n")
+    end
+
     def cube(z, y, x, opts = {}, &block)
       c = ChunkCube.new(self, [z, y, x], opts[:width], opts[:length], opts[:height])
       return c unless block_given?
@@ -40,6 +51,17 @@ module RubyCraft
 
 
     protected
+    def populateChunks
+      @chunks = Array.new(32) { Array.new(32) }
+      @bytes[0..(blockSize - 1)].each_slice(4).each_with_index do |ar, i|
+        offset = bytesToInt [0] + ar[0..-2]
+        count = ar.last
+        if count > 0
+          @chunks[i / 32][i % 32 ] = readChunk(offset)
+        end
+      end
+    end
+
     def readChunk(offset)
       o = offset * blockSize
       bytecount = bytesToInt @bytes[o..(o + 4)]

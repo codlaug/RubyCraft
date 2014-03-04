@@ -5,9 +5,5 @@ module RubyCraft
     end
 
     protected
-    def populateChunks
-      # TODO
-    end
-
   end
 end
