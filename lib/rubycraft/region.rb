@@ -74,8 +74,15 @@ module RubyCraft
       o = offset * block_size
       bytecount = bytesToInt @bytes[o..(o + 4)]
       o += 5
-      nbtBytes = @bytes[o..(o + bytecount - 2)]
-      LazyChunk.new nbtBytes, @options
+      lazy_chunk @bytes[o..(o + bytecount - 2)]
+    end
+
+    def lazy_chunk(nbtBytes)
+      LazyChunk.new nbtBytes, @options.merge(chunk_class: chunk_class)
+    end
+
+    def chunk_class
+      @options.fetch(:chunk_class) { default_chunk_class }
     end
 
     def chunkSize(chunk)

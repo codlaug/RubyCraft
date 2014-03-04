@@ -4,6 +4,10 @@ module RubyCraft
       super
     end
 
+    def default_chunk_class
+      ScaevolusChunk
+    end
+
     protected
   end
 end

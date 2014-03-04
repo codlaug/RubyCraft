@@ -6,6 +6,8 @@ module RubyCraft
   autoload :AnvilRegion         ,'rubycraft/anvil_region'
   autoload :ScaevolusRegion     ,'rubycraft/scaevolus_region'
   autoload :Chunk               ,'rubycraft/chunk'
+  autoload :AnvilChunk          ,'rubycraft/anvil_chunk'
+  autoload :ScaevolusChunk      ,'rubycraft/scaevolus_chunk'
   autoload :ChunkCube           ,'rubycraft/chunk_cube'
   autoload :Block               ,'rubycraft/block'
   autoload :LazyChunk           ,'rubycraft/lazy_chunk'

@@ -19,8 +19,10 @@ module RubyCraft
 
     attr_reader :options
     def initialize(bytes, options = {})
-      raise "Must be an io" if bytes.kind_of?(String)
-      @bytes = bytes
+      unless @bytes
+        raise "Must be an io" if bytes.kind_of?(String)
+        @bytes = bytes
+      end
       @options = options
     end
 
