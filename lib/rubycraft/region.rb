@@ -25,6 +25,10 @@ module RubyCraft
       populateChunks
     end
 
+    def inspect
+      %Q~<#{self.class} (#{@bytes.length} bytes)>~
+    end
+
     def cube(z, y, x, opts = {}, &block)
       c = ChunkCube.new(self, [z, y, x], opts[:width], opts[:length], opts[:height])
       return c unless block_given?
