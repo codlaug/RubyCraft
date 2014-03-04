@@ -6,21 +6,24 @@ require 'rubycraft/matrix3d'
 
 module RubyCraft
   # Chunks are enumerable over blocks
-  class Chunk
-    include Enumerable
-    include ZlibHelper
+  class Chunk < BinaryBunch
 
     Width = 16
     Length = 16
     Height = 128
 
     def self.fromNbt(bytes, *a)
-      new NbtHelper.fromNbt(bytes), *a
+      new bytes, *a
     end
 
-    def initialize(nbtData, options = {})
-      name, @nbtBody = nbtData
-      @options = options
+    def initialize(bytes, options = {})
+      @bytes = true # do not store
+      super
+      if bytes.length == 2
+        name, @nbtBody = bytes
+      else
+        name, @nbtBody = NbtHelper.fromNbt(bytes)
+      end
       unless options[:no_blocks]
         @blocks = parse_blocks
       end
