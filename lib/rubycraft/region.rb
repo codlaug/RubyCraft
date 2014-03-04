@@ -44,7 +44,7 @@ module RubyCraft
       output = RegionWriter.new io
       chunks = get_nbt_chunks
       writeChunkOffsets output, chunks
-      output.pad blockSize, dummytimestamp
+      output.pad block_size, dummytimestamp
       writeChunks output, chunks
       output.close
     end
@@ -53,12 +53,15 @@ module RubyCraft
       options.fetch(:chunks_count_per_side) { 32 }
     end
 
+    def block_size
+      options.fetch(:block_size) { 4096 }
+    end
 
     protected
     def populateChunks
       side = chunks_count_per_side
       @chunks = Array.new(side) { Array.new(side) }
-      @bytes[0..(blockSize - 1)].each_slice(4).each_with_index do |ar, i|
+      @bytes[0..(block_size - 1)].each_slice(4).each_with_index do |ar, i|
         offset = bytesToInt [0] + ar[0..-2]
         count = ar.last
         if count > 0
@@ -68,7 +71,7 @@ module RubyCraft
     end
 
     def readChunk(offset)
-      o = offset * blockSize
+      o = offset * block_size
       bytecount = bytesToInt @bytes[o..(o + 4)]
       o += 5
       nbtBytes = @bytes[o..(o + bytecount - 2)]
@@ -80,7 +83,7 @@ module RubyCraft
     end
 
     def chunkBlocks(chunk)
-      ((chunkSize chunk).to_f / blockSize).ceil
+      ((chunkSize chunk).to_f / block_size).ceil
     end
 
     def writeChunks(output, chunks)
@@ -89,8 +92,8 @@ module RubyCraft
         output << intBytes(chunk.size + 1)
         output << defaultCompressionType
         output << chunk
-        remaining = blockSize - chunkSize(chunk)
-        output.pad remaining % blockSize
+        remaining = block_size - chunkSize(chunk)
+        output.pad remaining % block_size
       end
     end
 
@@ -128,10 +131,6 @@ module RubyCraft
 
     def dummytimestamp
       0
-    end
-
-    def blockSize
-      4096
     end
 
   end
