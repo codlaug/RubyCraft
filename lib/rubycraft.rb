@@ -5,6 +5,7 @@ module RubyCraft
   autoload :AnvilRegion         ,'rubycraft/anvil_region'
   autoload :ScaevolusRegion     ,'rubycraft/scaevolus_region'
   autoload :Chunk               ,'rubycraft/chunk'
+  autoload :ChunkCube           ,'rubycraft/chunk_cube'
   autoload :Block               ,'rubycraft/block'
   autoload :LazyChunk           ,'rubycraft/lazy_chunk'
   autoload :ByteConverter       ,'rubycraft/byte_converter'
