@@ -124,7 +124,7 @@ describe Region do
   end
 
   describe '.from_file' do
-    let(:anvil) { '/media/niklas/Spinn/Games/FTB/YogCraft/minecraft/saves/FS/region/r.0.0.mca' }
+    let(:anvil) { File.expand_path('../../../fixtures/flat-r.0.0.mca', __FILE__) }
 
     it 'delegates .mca files to AnvilRegion' do
       region = double 'AnvilRegion'
