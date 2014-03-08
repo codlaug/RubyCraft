@@ -49,9 +49,13 @@ module RubyCraft
     protected
     def _getchunk
       if @chunk.nil?
-        @chunk = Chunk.fromNbt @bytes, @options
+        @chunk = chunk_class.fromNbt @bytes, @options
       end
       @chunk
+    end
+
+    def chunk_class
+      @options.fetch(:chunk_class) { Chunk }
     end
   end
 end
