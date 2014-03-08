@@ -113,10 +113,20 @@ module RubyCraft
         blocks = level['Blocks'].value.bytes
         data   = level['Data'].value.bytes
         blocks.each_with_index do |byte, index|
-          matrix.put_block index, byte, data[index / 2]
+          value = extract_data_half_byte data[index / 2], index
+          matrix.put_block index, byte, value
         end
       end
     end
+
+    def extract_data_half_byte(value, index)
+      if index % 2 == 0
+        value & 0xF
+      else
+        value >> 4
+      end
+    end
+
 
     class BlockMatrix < Matrix3d
       # must be done sequentally

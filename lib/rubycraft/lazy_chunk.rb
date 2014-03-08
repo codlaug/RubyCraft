@@ -1,4 +1,5 @@
 module RubyCraft
+  # TODO would actually make a good module, includable in all *Chunk
   class LazyChunk
     include ByteConverter
     include ZlibHelper
@@ -12,7 +13,11 @@ module RubyCraft
     def each(&block)
       _getchunk.each &block
     end
-  
+
+    def each_non_empty(&block)
+      _getchunk.each_non_empty &block
+    end
+
     def block_map(&block)
       _getchunk.block_map &block
     end
