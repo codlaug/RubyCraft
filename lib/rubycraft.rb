@@ -14,6 +14,7 @@ module RubyCraft
   autoload :ByteConverter       ,'rubycraft/byte_converter'
   autoload :ZlibHelper          ,'rubycraft/zlib_helper'
   autoload :RegionWriter        ,'rubycraft/region_writer'
+  autoload :Position3D          ,'rubycraft/position3d'
 end
 
 require 'rubycraft/region'
