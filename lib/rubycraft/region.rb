@@ -1,98 +1,9 @@
-require 'rubycraft/chunk'
-
 module RubyCraft
-  class LazyChunkDelegate
-    include ByteConverter
-    include ZlibHelper
-
-    def initialize(bytes, options = {})
-      @bytes = bytes
-      @options = options
-      @chunk = nil
-    end
-
-    def each(&block)
-      _getchunk.each &block
-    end
-  
-    def block_map(&block)
-      _getchunk.block_map &block
-    end
-    def block_type_map(&block)
-      _getchunk.block_type_map &block
-    end
-
-    def [](z, x, y)
-      _getchunk[z, x, y]
-    end
-
-    def []=(z, x, y, value)
-      _getchunk[z, x, y] = value
-    end
-
-    def export
-      _getchunk.export
-    end
-
-
-    def toNbt
-      return @bytes if @chunk.nil?
-      @chunk.toNbt
-    end
-
-
-    # unloacs the loaded chunk. Needed for memory optmization
-    def _unload
-      return if @chunk.nil?
-      @bytes = @chunk.toNbt
-      @chunk = nil
-    end
-
-    protected
-    def _getchunk
-      if @chunk.nil?
-        @chunk = Chunk.fromNbt @bytes, @options
-      end
-      @chunk
-    end
-
-  end
-
   # Enumerable over chunks
-  class Region
-    include Enumerable
-    include ByteConverter
-    include ZlibHelper
-  
-    class RegionWritter
-      def initialize(io)
-        @io = io
-      end
-
-      def pad(count, value = 0)
-        self << Array.new(count) { value }
-      end
-
-      def <<(o)
-        input = o.kind_of?(Array) ? o : [o]
-        @io <<  ByteConverter.toByteString(input)
-      end
-
-      def close
-        @io.close
-      end
-    end
-
-    def self.fromFile(filename)
-      new ByteConverter.stringToByteArray IO.read filename
-    end
-
-    def initialize(bytes, options = {})
-      raise "Must be an io" if bytes.kind_of?(String)
-      @bytes = bytes
-      @options = options
-      @chunks = Array.new(32) { Array.new(32) }
-      readChunks bytes
+  class Region < BinaryBunch
+    def initialize(*)
+      super
+      populateChunks
     end
 
     def chunk(z, x)
@@ -111,6 +22,18 @@ module RubyCraft
       end
     end
 
+    def chunk_string
+      @chunks.map do |line|
+        line.map do |chunk|
+          if chunk.nil?
+            '?'
+          else
+            'X'
+          end
+        end.join
+      end.join("\n")
+    end
+
     def cube(z, y, x, opts = {}, &block)
       c = ChunkCube.new(self, [z, y, x], opts[:width], opts[:length], opts[:height])
       return c unless block_given?
@@ -118,36 +41,48 @@ module RubyCraft
     end
 
     def exportTo(io)
-      output = RegionWritter.new io
-      chunks = getChunks
+      output = RegionWriter.new io
+      chunks = get_nbt_chunks
       writeChunkOffsets output, chunks
-      output.pad blockSize, dummytimestamp
+      output.pad block_size, dummytimestamp
       writeChunks output, chunks
       output.close
     end
 
-    def exportToFile(filename)
-      File.open(filename, "wb") { |f| exportTo f }
+    def chunks_count_per_side
+      options.fetch(:chunks_count_per_side) { 32 }
     end
 
+    def block_size
+      options.fetch(:block_size) { 4096 }
+    end
 
     protected
-    def readChunks(bytes)
-      bytes[0..(blockSize - 1)].each_slice(4).each_with_index do |ar, i|
+    def populateChunks
+      side = chunks_count_per_side
+      @chunks = Array.new(side) { Array.new(side) }
+      @bytes[0..(block_size - 1)].each_slice(4).each_with_index do |ar, i|
         offset = bytesToInt [0] + ar[0..-2]
         count = ar.last
         if count > 0
-          @chunks[i / 32][i % 32 ] = readChunk(offset, bytes)
+          @chunks[i / side][i % side ] = readChunk(offset)
         end
       end
     end
 
-    def readChunk(offset, bytes)
-      o = offset * blockSize
-      bytecount = bytesToInt bytes[o..(o + 4)]
+    def readChunk(offset)
+      o = offset * block_size
+      bytecount = bytesToInt @bytes[o..(o + 4)]
       o += 5
-      nbtBytes = bytes[o..(o + bytecount - 2)]
-      LazyChunkDelegate.new nbtBytes, @options
+      lazy_chunk @bytes[o..(o + bytecount - 2)]
+    end
+
+    def lazy_chunk(nbtBytes)
+      LazyChunk.new nbtBytes, @options.merge(chunk_class: chunk_class)
+    end
+
+    def chunk_class
+      @options.fetch(:chunk_class) { default_chunk_class }
     end
 
     def chunkSize(chunk)
@@ -155,7 +90,7 @@ module RubyCraft
     end
 
     def chunkBlocks(chunk)
-      ((chunkSize chunk).to_f / blockSize).ceil
+      ((chunkSize chunk).to_f / block_size).ceil
     end
 
     def writeChunks(output, chunks)
@@ -164,8 +99,8 @@ module RubyCraft
         output << intBytes(chunk.size + 1)
         output << defaultCompressionType
         output << chunk
-        remaining = blockSize - chunkSize(chunk)
-        output.pad remaining % blockSize
+        remaining = block_size - chunkSize(chunk)
+        output.pad remaining % block_size
       end
     end
 
@@ -183,7 +118,7 @@ module RubyCraft
       end
     end
 
-    def getChunks
+    def get_nbt_chunks
       map do |chunk|
         if chunk.nil?
           nil
@@ -205,57 +140,5 @@ module RubyCraft
       0
     end
 
-    def blockSize
-      4096
-    end
-
-  end
-
-
-  class ChunkCube
-    include Enumerable
-
-    # width corresponds do z, length to x, and height to y.
-    def initialize(region, initialPos, width, length, height)
-      @region = region
-      @initialPos = initialPos
-      @width = width || 1
-      @length = length || 1
-      @height = height || 1
-    end
-
-    def each(&block)
-      z, x, y = @initialPos
-      firstChunkX = x / chunkSide
-      firstChunkZ = z / chunkSide
-      lastChunkX = (x + @length - 1) / chunkSide
-      lastChunkZ = (z + @width - 1) / chunkSide
-      for j in firstChunkZ..lastChunkZ
-        for i in firstChunkX..lastChunkX
-          iterateOverChunk j, i, &block
-        end
-      end
-    end
-
-    protected
-    def iterateOverChunk(j, i, &block)
-      chunk = @region.chunk(j, i)
-      return if chunk.nil?
-      z, x, y = @initialPos
-      chunk.each do |b|
-        globalZ = b.z + (j * chunkSide)
-        globalX = b.x + (i * chunkSide)
-        if globalZ.between?(z, z + @width - 1) and
-            globalX.between?(x, x + @length - 1) and
-            b.y.between?(y, y + @height - 1)
-          yield b, globalZ - z, globalX - x , b.y - y
-        end
-      end
-      @region.unloadChunk(j, i)
-    end
-
-    def chunkSide
-      16
-    end
   end
 end

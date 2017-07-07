@@ -6,40 +6,26 @@ require 'rubycraft/matrix3d'
 
 module RubyCraft
   # Chunks are enumerable over blocks
-  class Chunk
-    include Enumerable
-    include ZlibHelper
+  class Chunk < BinaryBunch
 
     Width = 16
     Length = 16
     Height = 128
 
     def self.fromNbt(bytes, *a)
-      new NbtHelper.fromNbt(bytes), *a
+      new bytes, *a
     end
 
-    def initialize(nbtData, options = {})
-      name, @nbtBody = nbtData
-      @options = options
+    def initialize(bytes, options = {})
+      @bytes = true # do not store
+      super
+      if bytes.length == 2
+        name, @nbtBody = bytes
+      else
+        name, @nbtBody = NbtHelper.fromNbt(bytes)
+      end
       unless options[:no_blocks]
-        build_blocks
-      end
-    end
-
-    def build_blocks
-      bytes = level["Blocks"].value.bytes
-      @blocks = matrixfromBytes bytes
-      @blocks.each_triple_index do |b, z, x, y|
-        b.pos = [z, x, y]
-      end
-      data = level["Data"].value.bytes.to_a
-      @blocks.each_with_index do |b, index|
-        v = data[index / 2]
-        if index % 2 == 0
-          b.data = v & 0xF
-        else
-          b.data = v >> 4
-        end
+        @blocks = parse_blocks
       end
     end
 
@@ -122,10 +108,35 @@ module RubyCraft
       NBTFile::Types::ByteArray.new ByteConverter.toByteString(data)
     end
 
-    def matrixfromBytes(bytes)
-      Matrix3d.new(*dimensions).fromArray bytes.map {|byte| Block.get(byte) }
+    def parse_blocks
+      BlockMatrix.new(*dimensions).tap do |matrix|
+        blocks = level['Blocks'].value.bytes
+        data   = level['Data'].value.bytes
+        blocks.each_with_index do |byte, index|
+          value = extract_data_half_byte data[index / 2], index
+          matrix.put_block index, byte, value
+        end
+      end
     end
 
+    def extract_data_half_byte(value, index)
+      if index % 2 == 0
+        value & 0xF
+      else
+        value >> 4
+      end
+    end
+
+
+    class BlockMatrix < Matrix3d
+      # must be done sequentally
+      def put_block(index, byte, data)
+        block = Block.get(byte)
+        block.data = data
+        block.pos = *indexToArray(index)
+        put index, block
+      end
+    end
 
   end
 end

@@ -80,6 +80,13 @@ Dependencies:
 ---------
 [Nbtfile](http://github.com/mental/nbtfile)
 
+
+Further Information:
+-------------------
+
+Details on [Chunk File Format](http://minecraft.gamepedia.com/Alpha_Level_Format/Chunk_File_Format) and
+[Level Format](http://minecraft.gamepedia.com/Level_Format).
+
 Meta
 ----
 
