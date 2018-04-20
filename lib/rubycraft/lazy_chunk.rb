@@ -25,6 +25,10 @@ module RubyCraft
       _getchunk.block_type_map &block
     end
 
+    def section(y)
+      _getchunk.section(y)
+    end
+
     def [](z, x, y)
       _getchunk[z, x, y]
     end
