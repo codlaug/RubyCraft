@@ -10,18 +10,12 @@ module RubyCraft
     # Sections; each chunk has up to 16 individual 16×16×16 block Sections so
     # that completely empty sections will not be saved at all.
 
+    Height = 256
+
     def parse_blocks
       level['Sections'].each do |section|
-        blocks = section['Blocks'].value.bytes
-        data   = section['Data'].value.bytes
-        y      = section['Y'].value
-        section(y).tap do |section|
-          blocks.each_with_index do |byte, index|
-            value = extract_data_half_byte data[index / 2], index
-            section.put_block index, byte, value
-            # TODO position
-          end
-        end
+        y = section['Y'].value
+        sections[y] = Section.new(section)
       end
     end
 
@@ -38,11 +32,11 @@ module RubyCraft
     def section(y)
       raise(ArgumentError, 'must be 0 or greater') if y < 0
       raise(ArgumentError, 'must be lesser than 16') if y >= 16
-      sections[y] ||= BlockMatrix.new(16,16,16)
+      sections[y] ||= Section.new(16,16,16)
     end
 
     def each(&block)
-      sections.each do |section|
+      sections.compact.each do |section|
         section.each(&block)
       end
     end
@@ -64,5 +58,26 @@ module RubyCraft
     def section_index(y)
       y >> 4
     end
+
+    def export
+      secs = @sections.map{|sec| sec.export if not sec.nil? }.compact
+      level["Sections"] = NBTFile::Types::List.new(NBTFile::Types::Compound, secs)
+      level["HeightMap"] = exportHeightMap
+      ["", @nbtBody]
+    end
+
+    protected
+    def exportHeightMap
+      height_map = level["HeightMap"].values
+      xwidth = Width
+      each do |b|
+        unless b.transparent
+          y, z, x = b.pos
+          height_map[z*xwidth + x] = [height_map[z*xwidth + x], y+1].max
+        end
+      end
+      return NBTFile::Types::IntArray.new(height_map)
+    end
+
   end
 end

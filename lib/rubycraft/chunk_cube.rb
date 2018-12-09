@@ -12,7 +12,7 @@ module RubyCraft
     end
 
     def each(&block)
-      z, x, y = @initialPos
+      z, y, x = @initialPos # anvil format
       firstChunkX = x / chunkSide
       firstChunkZ = z / chunkSide
       lastChunkX = (x + @length - 1) / chunkSide
@@ -28,7 +28,7 @@ module RubyCraft
     def iterateOverChunk(j, i, &block)
       chunk = @region.chunk(j, i)
       return if chunk.nil?
-      z, x, y = @initialPos
+      z, y, x = @initialPos # anvil format
       chunk.each do |b|
         globalZ = b.z + (j * chunkSide)
         globalX = b.x + (i * chunkSide)

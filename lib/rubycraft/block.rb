@@ -5,8 +5,8 @@ module RubyCraft
   class Block
 
     attr_accessor :block_type, :pos, :data
-    def initialize(blockType, data = 0)
-      @blockType = blockType
+    def initialize(block_type, data = 0)
+      @block_type = block_type
       @data = 0
     end
 
@@ -40,27 +40,27 @@ module RubyCraft
     end
 
     def name
-      @blockType.name
+      @block_type.name
     end
 
     def id
-      @blockType.id
+      @block_type.id
     end
 
     def transparent
-      @blockType.transparent
+      @block_type.transparent
     end
 
     #sets block type by name
-    def name=(newName)
-      return if name == newName.to_s
-      @blockType = BlockType[newName]
+    def name=(new_name)
+      return if name == new_name.to_s
+      @block_type = BlockType[new_name]
     end
 
     #sets block type by id
     def id=(id)
       return if id == id
-      @blockType = BlockType.get id
+      @block_type = BlockType.get id
     end
 
     def y
