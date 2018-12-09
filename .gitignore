@@ -10,5 +10,6 @@ db
 
 ## Build
 *.gem
+Gemfile.lock
 
 fixtures/output.mcr

@@ -1,4 +1,4 @@
 source 'https://rubygems.org'
 
 gemspec name: 'rubycraft'
-gem 'nbtfile', github: 'niklas/nbtfile'
+gem 'nbtfile', github: 'codlaug/nbtfile'
