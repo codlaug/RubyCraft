@@ -1,3 +1,5 @@
+require 'rubycraft/section'
+
 module RubyCraft
   class AnvilChunk < Chunk
     # In the Anvil format, block positions are ordered YZX for compression purposes.

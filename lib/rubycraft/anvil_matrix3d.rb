@@ -1,3 +1,4 @@
+require 'rubycraft/matrix3d'
 module RubyCraft
   
     class AnvilMatrix3d < Matrix3d
