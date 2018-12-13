@@ -22,6 +22,8 @@ module RubyCraft
     end
 
     def sections
+      # A chunk can have fewer than 16 sections
+      # how do I store that data?
       @sections ||= Array.new(16)
     end
 
@@ -34,7 +36,13 @@ module RubyCraft
     def section(y)
       raise(ArgumentError, 'must be 0 or greater') if y < 0
       raise(ArgumentError, 'must be lesser than 16') if y >= 16
-      sections[y] ||= Section.new(16,16,16)
+      sections[y] ||= Section.new(find_section_by_y(y))
+    end
+
+    def find_section_by_y y
+      level['Sections'].find do |section|
+        y == section['Y'].value
+      end
     end
 
     def each(&block)

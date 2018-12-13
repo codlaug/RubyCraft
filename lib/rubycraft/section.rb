@@ -11,20 +11,25 @@ module RubyCraft
     Height = 16
 
     def initialize(section)
-      @base_y = section["Y"].value * Height
-      @nbt_section = section
-      @blocks = AnvilMatrix3d.new(Width, Length, Height).fromArray(blocks_from_nbt(section))
-      @blocks.each_triple_index do |b, y, x, z|
-        b.pos = [y + @base_y, z, x]
-      end
-      data = section["Data"].value.bytes.to_a
-      @blocks.each_with_index do |b, index|
-        v = data[index / 2]
-        if index % 2 == 0
-          b.data = v & 0xF
-        else
-          b.data = v >> 4
+      if section
+        @base_y = section["Y"].value * Height
+        @nbt_section = section
+        @blocks = AnvilMatrix3d.new(Width, Length, Height).fromArray(blocks_from_nbt(section))
+        @blocks.each_triple_index do |b, y, x, z|
+          b.pos = [y + @base_y, z, x]
         end
+        data = section["Data"].value.bytes.to_a
+        @blocks.each_with_index do |b, index|
+          v = data[index / 2]
+          if index % 2 == 0
+            b.data = v & 0xF
+          else
+            b.data = v >> 4
+          end
+        end
+      else
+        @base_y = 0
+        @blocks = AnvilMatrix3d.new(Width, Length, Height)
       end
     end
 

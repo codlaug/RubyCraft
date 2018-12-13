@@ -5,7 +5,12 @@ module RubyCraft
       include Enumerable
   
       def [](x, y, z)
-        @data[y][x][z]
+        begin
+          @data[y][x][z]
+        rescue NoMethodError => e
+          # return nil when an empty section asks for a block
+          nil
+        end
       end
   
       def []=(x, y, z, value)
