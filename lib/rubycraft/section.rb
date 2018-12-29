@@ -12,6 +12,7 @@ module RubyCraft
 
     def initialize(section)
       if section
+        @is_empty = false
         @base_y = section["Y"].value * Height
         @nbt_section = section
         @blocks = AnvilMatrix3d.new(Width, Length, Height).fromArray(blocks_from_nbt(section))
@@ -28,9 +29,14 @@ module RubyCraft
           end
         end
       else
+        @is_empty = true
         @base_y = 0
         @blocks = AnvilMatrix3d.new(Width, Length, Height)
       end
+    end
+
+    def nil?
+      @is_empty
     end
 
     def each(&block)
@@ -52,6 +58,10 @@ module RubyCraft
     def []=(y, z, x, value)
       value.pos = [y, z, x]
       @blocks[z, y - @base_y, x] = value
+    end
+
+    def to_a
+      @blocks.to_a
     end
 
     def export

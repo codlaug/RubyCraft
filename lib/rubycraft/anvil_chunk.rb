@@ -58,7 +58,13 @@ module RubyCraft
     end
 
     def [](y, z, x)
-      section_by_coord(y)[y % 16, z, x]
+      sec_y = section_index(y)
+      if sec = @sections[sec_y]
+        sec[y, z, x]
+      else
+        nil
+      end
+      # section_by_coord(y)[y % 16, z, x]
     end
 
     def []=(y, z, x, value)

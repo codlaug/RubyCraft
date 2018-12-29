@@ -4,7 +4,7 @@ module RubyCraft
     class AnvilMatrix3d < Matrix3d
       include Enumerable
   
-      def [](x, y, z)
+      def [](z, y, x)
         begin
           @data[y][x][z]
         rescue NoMethodError => e
