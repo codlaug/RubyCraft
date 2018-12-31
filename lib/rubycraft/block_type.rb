@@ -174,6 +174,8 @@ module RubyCraft
     def self.get(key)
       if @blocks.has_key?(key)
         return @blocks[key].clone
+      elsif @blocks_by_name.has_key?(key)
+        return @blocks_by_name[key].clone
       end
       new(key, "unknown(#{key})", false)
     end

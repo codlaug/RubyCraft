@@ -11,7 +11,6 @@ module RubyCraft
     Height = 16
 
     def initialize(section)
-      puts section['Palette'].inspect
       if section
         @is_empty = false
         @base_y = section["Y"].value * Height
@@ -20,13 +19,15 @@ module RubyCraft
         @blocks.each_triple_index do |b, y, x, z|
           b.pos = [y + @base_y, z, x]
         end
-        data = section["Data"].value.bytes.to_a
-        @blocks.each_with_index do |b, index|
-          v = data[index / 2]
-          if index % 2 == 0
-            b.data = v & 0xF
-          else
-            b.data = v >> 4
+        if section['Data']
+          data = section["Data"].value.bytes.to_a
+          @blocks.each_with_index do |b, index|
+            v = data[index / 2]
+            if index % 2 == 0
+              b.data = v & 0xF
+            else
+              b.data = v >> 4
+            end
           end
         end
       else
@@ -97,19 +98,34 @@ module RubyCraft
       NBTFile::Types::ByteArray.new ByteConverter.toByteString(data)
     end
 
+    class Palette
+      attr_accessor :name, :properties
+      def initialize compound
+        @name = compound['Name'].value
+        @properties = compound['Properties']&.keys # FIXME
+      end
+    end
+
     def blocks_from_nbt(section)
-      palette = section['Palette'].each.map{|c| c['Name'].value }
+      palette = section['Palette'].each.map{|c| Palette.new(c) }
 
       if section["Blocks"]
         block_bytes = section["Blocks"].value.bytes
-      else
+      elsif section['BlockStates']
         block_bytes = get_block_array(section['BlockStates'].value)
       end
       if section["Add"]
         add_bytes = section["Add"].value.bytes.map{|b| [b & 15, b >> 4] }.flatten
         return block_bytes.zip(add_bytes).map{|b, a| AnvilBlock.get((a << 8) + b) }
       else
-        return block_bytes.map{|b| AnvilBlock.get(b, palette[b & 0xF]) }
+        if section['BlockStates']
+          block_bytes.map do |b|
+            raise "no index #{b} found in palette: #{palette.inspect}" unless palette[b]
+            AnvilBlock.get(palette[b].name)
+          end
+        else
+          return block_bytes.map{|b| AnvilBlock.get(b) }
+        end
       end
     end
 
@@ -125,7 +141,7 @@ module RubyCraft
 
         overhang = (bit_per_index - (64 * i) % bit_per_index) % bit_per_index
         if overhang > 0
-          return_value[current_reference_index - 1] = return_value[current_reference_index - 1] | current % ((1 << overhang) << (bit_per_index - overhang))
+          return_value[current_reference_index - 1] |= current % ((1 << overhang) << (bit_per_index - overhang))
         end
         current = current >> overhang
 
@@ -137,7 +153,7 @@ module RubyCraft
         end
       end
 
-      return_value.each_slice(16).each_slice(16).to_a
+      return_value #.each_slice(16).each_slice(16).to_a
     end
   end
 end

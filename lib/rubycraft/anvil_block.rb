@@ -3,13 +3,10 @@ require 'rubycraft/block_type'
 module RubyCraft
   # A minecraft block. Its position is given by a coord[x, z, y]
   class AnvilBlock < Block
-    def self.get(key, type)
+    def self.get(key)
       puts '-------'
-      puts type.inspect
       puts key.inspect
-      puts (key & 0xF).inspect
-      puts (key >> 4).inspect
-      new BlockType.get key
+      new BlockType.get key.split(':')[1]
     end
 
     def self.intBytes(i)
