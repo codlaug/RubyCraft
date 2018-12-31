@@ -11,6 +11,7 @@ module RubyCraft
     Height = 16
 
     def initialize(section)
+      puts section['Palette'].inspect
       if section
         @is_empty = false
         @base_y = section["Y"].value * Height
@@ -97,13 +98,46 @@ module RubyCraft
     end
 
     def blocks_from_nbt(section)
-      block_bytes = section["Blocks"].value.bytes
+      palette = section['Palette'].each.map{|c| c['Name'].value }
+
+      if section["Blocks"]
+        block_bytes = section["Blocks"].value.bytes
+      else
+        block_bytes = get_block_array(section['BlockStates'].value)
+      end
       if section["Add"]
         add_bytes = section["Add"].value.bytes.map{|b| [b & 15, b >> 4] }.flatten
         return block_bytes.zip(add_bytes).map{|b, a| AnvilBlock.get((a << 8) + b) }
       else
-        return block_bytes.map{|b| AnvilBlock.get(b) }
+        return block_bytes.map{|b| AnvilBlock.get(b, palette[b & 0xF]) }
       end
+    end
+
+
+    def get_block_array(blockstates)
+
+      return_value = [0] * 4096
+      bit_per_index = blockstates.length * 64 / 4096
+      current_reference_index = 0
+  
+      blockstates.length.times do |i|
+        current = blockstates[i]
+
+        overhang = (bit_per_index - (64 * i) % bit_per_index) % bit_per_index
+        if overhang > 0
+          return_value[current_reference_index - 1] = return_value[current_reference_index - 1] | current % ((1 << overhang) << (bit_per_index - overhang))
+        end
+        current = current >> overhang
+
+        remaining_bits = 64 - overhang
+        ((remaining_bits + (bit_per_index - remaining_bits % bit_per_index) % bit_per_index) / bit_per_index).times do
+          return_value[current_reference_index] = current % (1 << bit_per_index)
+          current_reference_index += 1
+          current >>= bit_per_index
+        end
+      end
+
+      return_value.each_slice(16).each_slice(16).to_a
     end
   end
 end
