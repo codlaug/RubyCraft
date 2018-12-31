@@ -16,6 +16,7 @@ module RubyCraft
     block 13, :gravel
     block 14, :goldore
     block 15, :ironore
+    block 15, :iron_ore
     block 16, :coal
     block 17, :log
     block 18, :leaves

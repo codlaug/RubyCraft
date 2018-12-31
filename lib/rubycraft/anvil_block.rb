@@ -1,4 +1,5 @@
 require 'rubycraft/block_type'
+require 'json'
 
 module RubyCraft
   # A minecraft block. Its position is given by a coord[x, z, y]
@@ -9,8 +10,10 @@ module RubyCraft
       new BlockType.get key.split(':')[1]
     end
 
-    def self.intBytes(i)
-      [i >> 24, (i >> 16) & 0xFF, (i >> 8) & 0xFF, i & 0xFF]
+    GLOBAL_PALETTE = JSON.parse(File.read(File.join(File.dirname(__FILE__), 'runtimeid_table.json')))
+
+    def self.get_from_global_palette(id)
+      new BlockType.get GLOBAL_PALETTE[id]['name'].split(':')[1]
     end
 
     def y

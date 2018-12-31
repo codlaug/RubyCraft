@@ -120,8 +120,17 @@ module RubyCraft
       else
         if section['BlockStates']
           block_bytes.map do |b|
-            raise "no index #{b} found in palette: #{palette.inspect}" unless palette[b]
-            AnvilBlock.get(palette[b].name)
+            if palette[b]
+              begin
+                AnvilBlock.get(palette[b].name)
+              rescue RuntimeError => e
+                puts e
+                puts palette[b].inspect
+              end
+            else
+              # raise "NOT FOUND"
+              AnvilBlock.get_from_global_palette(b)
+            end
           end
         else
           return block_bytes.map{|b| AnvilBlock.get(b) }
