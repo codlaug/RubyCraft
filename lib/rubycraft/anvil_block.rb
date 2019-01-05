@@ -5,8 +5,6 @@ module RubyCraft
   # A minecraft block. Its position is given by a coord[x, z, y]
   class AnvilBlock < Block
     def self.get(key)
-      puts '-------'
-      puts key.inspect
       new BlockType.get key.split(':')[1]
     end
 

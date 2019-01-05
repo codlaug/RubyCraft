@@ -84,6 +84,7 @@ module RubyCraft
 
     protected
     def exportHeightMap
+      return level['Heightmaps'] || level['HeightMap']
       height_map = level["HeightMap"].values
       xwidth = Width
       each do |b|

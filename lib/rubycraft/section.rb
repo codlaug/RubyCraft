@@ -67,18 +67,19 @@ module RubyCraft
     end
 
     def export
-      @nbt_section["Data"] = byte_array(export_level_data)
-      block_ids = @blocks.map(&:id)
-      @nbt_section["Blocks"] = byte_array(block_ids)
-      if block_ids.any?{|id| id > 255}
-        adds = block_ids.map.with_index do |_,i|
-          (i % 2 == 0) ? [block_ids[i], block_ids[i+1]] : nil
-        end.compact.map do |b1, b2|
-          ((b2 >> 8) << 4) + (b1 >> 8)
-        end
-        @nbt_section["Add"] = byte_array(adds)
-      end
-      return @nbt_section
+      @nbt_section
+      # @nbt_section["Data"] = byte_array(export_level_data)
+      # block_ids = @blocks.map(&:id)
+      # @nbt_section["Blocks"] = byte_array(block_ids)
+      # if block_ids.any?{|id| id > 255}
+      #   adds = block_ids.map.with_index do |_,i|
+      #     (i % 2 == 0) ? [block_ids[i], block_ids[i+1]] : nil
+      #   end.compact.map do |b1, b2|
+      #     ((b2 >> 8) << 4) + (b1 >> 8)
+      #   end
+      #   @nbt_section["Add"] = byte_array(adds)
+      # end
+      # return @nbt_section
     end
 
     private
@@ -121,12 +122,7 @@ module RubyCraft
         if section['BlockStates']
           block_bytes.map do |b|
             if palette[b]
-              begin
-                AnvilBlock.get(palette[b].name)
-              rescue RuntimeError => e
-                puts e
-                puts palette[b].inspect
-              end
+              AnvilBlock.get(palette[b].name)
             else
               # raise "NOT FOUND"
               AnvilBlock.get_from_global_palette(b)
