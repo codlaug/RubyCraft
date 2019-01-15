@@ -5,7 +5,7 @@ module RubyCraft
   # A minecraft block. Its position is given by a coord[x, z, y]
   class AnvilBlock < Block
     def self.get(key)
-      new BlockType.get key.split(':')[1]
+      new BlockType.get(key.respond_to?(:split) ? key.split(':')[1] : key)
     end
 
     GLOBAL_PALETTE = JSON.parse(File.read(File.join(File.dirname(__FILE__), 'runtimeid_table.json')))

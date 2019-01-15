@@ -108,7 +108,9 @@ module RubyCraft
     end
 
     def blocks_from_nbt(section)
-      palette = section['Palette'].each.map{|c| Palette.new(c) }
+      if section['Palette']
+        palette = section['Palette'].each.map{|c| Palette.new(c) }
+      end
 
       if section["Blocks"]
         block_bytes = section["Blocks"].value.bytes
