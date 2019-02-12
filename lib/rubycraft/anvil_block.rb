@@ -8,7 +8,7 @@ module RubyCraft
       new BlockType.get(key.respond_to?(:split) ? key.split(':')[1] : key)
     end
 
-    GLOBAL_PALETTE = JSON.parse(File.read(File.join(File.dirname(__FILE__), 'runtimeid_table.json')))
+    GLOBAL_PALETTE = JSON.parse(File.read(File.join(File.dirname(__FILE__), 'runtimeid_table.json'))).freeze
 
     def self.get_from_global_palette(id)
       new BlockType.get GLOBAL_PALETTE[id]['name'].split(':')[1]

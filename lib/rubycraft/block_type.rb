@@ -97,7 +97,14 @@ module RubyCraft
     transparent_block 94, :repeater_on
     block 95, :locked_chest
     transparent_block 96, :trapdoor
-  end
+    block 98, :stonebrick
+    block 126, :wooden_slab
+    block 134, :spruce_stairs
+    block 155, :quartz_block
+    block 159, :stained_hardened_clay
+    block 164, :dark_oak_stairs
+    block 172, :hardened_clay
+  end.freeze
 
 
   # DSL: color name r, g, b
@@ -139,6 +146,7 @@ module RubyCraft
       @g = g
       @b = b
       @data = data
+      freeze
     end
 
     def rgb
